@@ -1,0 +1,10 @@
+notion-client
+python-dotenv
+openai
+langchain
+tiktoken
+chromadb
+langchain-community
+tenacity
+argparse
+discord
