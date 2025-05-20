@@ -12,6 +12,7 @@ A Discord bot that uses a query pipeline to answer questions based on a knowledg
 - Environment variable configuration
 - Notion integration for knowledge base access
 - Semantic search capabilities
+- Configurable LLM model and parameters
 
 ## Setup
 
@@ -34,6 +35,10 @@ A Discord bot that uses a query pipeline to answer questions based on a knowledg
    RATE_LIMIT_MAX=5      # Optional, defaults to 5 requests per window
    NOTION_API_KEY=your_notion_api_key  # Required for Notion integration
    NOTION_DATABASE_ID=your_notion_database_id  # Required for Notion integration
+   OPENAI_API_KEY=your_openai_api_key  # Required for OpenAI integration
+   LLM_MODEL=gpt-4  # Optional, defaults to gpt-4
+   LLM_TEMPERATURE=0.7  # Optional, defaults to 0.7
+   LLM_MAX_TOKENS=1000  # Optional, defaults to 1000
    ```
 
 ## Usage
@@ -57,6 +62,10 @@ A Discord bot that uses a query pipeline to answer questions based on a knowledg
 - `RATE_LIMIT_MAX`: Maximum requests allowed per window (optional, default: 5)
 - `NOTION_API_KEY`: Your Notion API key (required)
 - `NOTION_DATABASE_ID`: ID of the Notion database to query (required)
+- `OPENAI_API_KEY`: Your OpenAI API key (required)
+- `LLM_MODEL`: The OpenAI model to use (optional, default: gpt-4)
+- `LLM_TEMPERATURE`: Controls randomness in responses (optional, default: 0.7)
+- `LLM_MAX_TOKENS`: Maximum tokens in response (optional, default: 1000)
 
 ## Notion Integration
 

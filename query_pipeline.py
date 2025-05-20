@@ -22,8 +22,10 @@ VECTOR_DB_COLLECTION = os.getenv("VECTOR_DB_COLLECTION", "agent-converto")
 OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
 CHROMA_DB_PATH = Path("./chroma_db")
 # You might want a different LLM model for generation, e.g., "gpt-4", "gpt-3.5-turbo"
-LLM_MODEL = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4")
 N_SEARCH_RESULTS = 5 # Number of relevant chunks to retrieve from the DB
+TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.7"))  # Control randomness in responses
+MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "1000"))  # Maximum tokens in response
 
 # Validate required environment variables
 required_env_vars = ["OPENAI_API_KEY", "NOTION_TOKEN", "DATABASE_ID"]
@@ -132,8 +134,8 @@ def generate_answer(query: str, context: str, model_name: str = LLM_MODEL) -> st
         response = openai.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=0.7, # Adjust temperature for creativity (lower for more factual)
-            max_tokens=500 # Adjust max_tokens as needed
+            temperature=TEMPERATURE,
+            max_tokens=MAX_TOKENS
         )
         
         if response.choices and len(response.choices) > 0:
