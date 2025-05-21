@@ -299,6 +299,11 @@ async def summary_command(interaction: discord.Interaction, course: str, lesson:
     await interaction.response.defer()
     
     try:
+        # Check if the command is being used in a thread
+        if isinstance(interaction.channel, discord.Thread):
+            await interaction.followup.send("This command cannot be used within a thread. Please use it in a regular channel.")
+            return
+
         # Get the lesson content from ChromaDB
         client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
         collection = client.get_collection(VECTOR_DB_COLLECTION)
