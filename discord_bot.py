@@ -48,6 +48,7 @@ CHROMA_DB_PATH = Path("./chroma_db")
 # Thread tracking
 thread_lessons = {}  # Maps thread_id to (course, lesson) tuple
 thread_history = {}  # Maps thread_id to list of (role, content) tuples
+thread_content = {}  # Maps thread_id to full lesson content
 
 # Validate required environment variables
 required_env_vars = ["DISCORD_BOT_TOKEN", "DISCORD_CHANNEL_ID"]
@@ -331,6 +332,7 @@ async def summary_command(interaction: discord.Interaction, course: str, lesson:
         # Store the lesson context in our thread tracking
         thread_lessons[thread.id] = (course, lesson)
         thread_history[thread.id] = []  # Initialize empty history
+        thread_content[thread.id] = lesson_content
         
         # Send the summary in the thread
         await thread.send(f"**Summary of {lesson} from {course}:**\n{summary}\n\nYou can ask follow-up questions about this lesson in this thread!")
@@ -439,18 +441,32 @@ async def on_message(message):
                     
                     # Get conversation history
                     conversation_context = get_thread_context(message.channel.id)
+                    
+                    # Get the full lesson content for this thread
+                    full_lesson_content = thread_content.get(message.channel.id, "")
+                    
+                    # Use your existing query pipeline functions to get related content from other lessons
+                    query_embedding = get_embedding(context_query)
+                    search_results = search_database(query_embedding)
+                    related_context = format_context(search_results)
+                    
+                    # Combine all context: conversation history, full lesson content, and related content
+                    context = f"{conversation_context}\n\n"
+                    if full_lesson_content:
+                        context += f"Full lesson content:\n{full_lesson_content}\n\n"
+                    if related_context and "No relevant information" not in related_context:
+                        context += f"Related content from other lessons:\n{related_context}"
                 else:
                     context_query = query
                     conversation_context = ""
-
-                # Use your existing query pipeline functions
-                query_embedding = get_embedding(context_query)
-                search_results = search_database(query_embedding)
-                context = format_context(search_results)
-                
-                # Combine the conversation history with the search results
-                if conversation_context:
-                    context = f"{conversation_context}\n\n{context}"
+                    # Use your existing query pipeline functions
+                    query_embedding = get_embedding(context_query)
+                    search_results = search_database(query_embedding)
+                    context = format_context(search_results)
+                    
+                    # Combine the conversation history with the search results
+                    if conversation_context:
+                        context = f"{conversation_context}\n\n{context}"
 
                 if "No relevant information" in context:
                     response = context
@@ -476,6 +492,8 @@ async def on_thread_update(before, after):
         del thread_lessons[before.id]
         if before.id in thread_history:
             del thread_history[before.id]
+        if before.id in thread_content:
+            del thread_content[before.id]
         logger.info(f"Cleaned up thread data for archived thread: {before.name}")
 
 # Run the Discord bot
